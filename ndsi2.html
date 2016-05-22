@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang='en'>
+	<head>
+	  <meta charset='utf-8'>
+	  <title>D3: Transitioning to randomized data values</title>
+	  <script type='text/javascript' src='../d3/d3.js'></script>
+	  <style type='text/css'>
+	    /* no style rules here yet */
+	  </style>
+  </head>
+  
+  <body>
+    
+    <script type ='text/javascript'>
+    
+      // set plot dimensions
+      var w = Math.pow(2, 8);
+      var h = Math.pow(2, 10);
+      
+      /*
+      // and scales
+      var y_scale = d3.scale.ordinal()
+        .domain(d3.range(dataset.length))
+        .rangeRoundBands([0, h], .1);
+      var x_scale = d3.scale.linear()
+        .domain([0, d3.max(dataset)])
+        .range([0, w]);
+      var label_padding = 30;
+      */
+      
+      // init stuff
+      var reviews = [];
+      var n_reviews;
+      var pos_freq = [];
+      var neg_freq = [];
+      var alpha = Math.pow(2, 8);
+      
+      // read in some data
+      d3.csv('cleaned-reviews.csv', function(x) {
+      
+        reviews = x;
+        
+        // how many rows?
+        n_reviews = reviews.length;
+        console.log(n_reviews)
+        
+        //count up the number of times each word occurs per sentiment
+        for (i = 0; i < n_reviews; i++) {
+          var string = reviews[i]['review'];
+          var words = string.toLowerCase().split(/\s/);
+          if (reviews[i]['sentiment'] == 0) {
+            for (j = 0; j < words.length; j++) {
+              if (!neg_freq[words[j]]) {
+                neg_freq[words[j]] = 0;
+              }
+              neg_freq[words[j]] += 1;
+            }
+          } else {
+            for (j = 0; j < words.length; j++) {
+              if (!pos_freq[words[j]]) {
+                pos_freq[words[j]] = 0;
+              }
+              pos_freq[words[j]] += 1;
+            }
+          }
+        }
+        
+        // list of all words
+        var word_list = [...new Set(Object.keys(pos_freq).concat(Object.keys(neg_freq)))];
+        
+        var ndsi = [];
+        for (i = 0; i < word_list.length; i++) {
+          var word = word_list[i];
+          var n_pos = pos_freq[word];
+          if (typeof(n_pos) == 'undefined') {
+            n_pos = 0;
+          }
+          var n_neg = neg_freq[word];
+          if (typeof(n_neg) == 'undefined') {
+            n_neg = 0;
+          }
+          var ndsi = (n_pos - n_neg) / (n_pos + n_neg + 2 * alpha);
+          ndsi[word] = ndsi;
+        }
+        
+        console.log(ndsi.length)
+        
+        
+      });
+        
+    </script>
+  </body>
+</html>
